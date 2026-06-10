@@ -1,0 +1,40 @@
+{
+  "_comment": "Draft del agente (paso 2). NO incluye schema_version/run/team_level/gating — build_payload.py los completa. Este ejemplo es la flota de 3 agentes de Leanmote.",
+  "scope": "fleet",
+  "tenant_label": "Leanmote internal dev pipeline",
+  "maturity_vector": {
+    "dimensions": {
+      "context":         { "level": "L2", "transition_to": "L3", "confidence": "strong", "evidence": ["AGENTS.md exists for all 3 agents", "missing domain glossary / anti-patterns / examples"] },
+      "versioning":      { "level": "L1", "transition_to": "L2", "confidence": "strong", "evidence": ["no git on agent dirs", "no changelog / rollback"] },
+      "governance":      { "level": "L1", "transition_to": "L2", "confidence": "strong", "evidence": ["no named approver", "0 PR reviews in 7 days"] },
+      "drift_detection": { "level": "L1", "transition_to": "L2", "confidence": "strong", "evidence": ["no quality dashboard", "agents blind to Leanmote anomalies"] },
+      "distribution":    { "level": "L2", "transition_to": null, "confidence": "weak", "evidence": ["auto-loaded each session"] }
+    }
+  },
+  "agents": [
+    { "external_id": "orchestrator", "kind": "custom", "leanmote_user_hint": "Orchestrator", "respondent_mode": "self",
+      "bottleneck_profile": {
+        "context_retrieval": { "state": "healthy" }, "instruction_engineering": { "state": "degraded" },
+        "context_packing": { "state": "healthy" }, "grounding_verification": { "state": "degraded" },
+        "output_feedback_loop": { "state": "broken" }, "collaboration": { "state": "broken" } }, "flags": ["conflict"] },
+    { "external_id": "developer", "kind": "custom", "leanmote_user_hint": "Developer", "respondent_mode": "proxy",
+      "bottleneck_profile": {
+        "context_retrieval": { "state": "degraded" }, "instruction_engineering": { "state": "degraded" },
+        "context_packing": { "state": "degraded" }, "grounding_verification": { "state": "broken" },
+        "output_feedback_loop": { "state": "degraded" }, "collaboration": { "state": "degraded" } }, "flags": ["candidate_pair"] },
+    { "external_id": "qa", "kind": "custom", "leanmote_user_hint": "QA", "respondent_mode": "proxy",
+      "bottleneck_profile": {
+        "context_retrieval": { "state": "healthy" }, "instruction_engineering": { "state": "healthy" },
+        "context_packing": { "state": "healthy" }, "grounding_verification": { "state": "degraded" },
+        "output_feedback_loop": { "state": "degraded" }, "collaboration": { "state": "degraded" } }, "flags": ["fragile_local_solution"] }
+  ],
+  "findings": [
+    { "id": "f1", "title": "Fix Orchestrator AGENTS.md line 64/109 contradiction", "finding_scope": "agent", "agent_external_id": "orchestrator", "axis": "instruction_engineering", "impact": "medium", "effort": "low" },
+    { "id": "f2", "title": "Add pre-handoff verification to Developer's AGENTS.md", "finding_scope": "agent", "agent_external_id": "developer", "axis": "grounding_verification", "impact": "high", "effort": "low" },
+    { "id": "f3", "title": "Put all three AGENTS.md files under version control", "finding_scope": "team", "dimension": "versioning", "level_move": "L1→L2", "impact": "high", "effort": "medium" },
+    { "id": "f4", "title": "Add verification-depth checklist to QA's AGENTS.md", "finding_scope": "agent", "agent_external_id": "qa", "axis": "grounding_verification", "impact": "high", "effort": "low" },
+    { "id": "f5", "title": "Authorize a fleet-wide domain glossary", "finding_scope": "team", "dimension": "context", "level_move": "L2→L3", "impact": "high", "effort": "low" }
+  ],
+  "confidence_ledger": { "strong": 50, "weak": 18, "unverifiable": 2, "triggers": 70 },
+  "conflicts": []
+}

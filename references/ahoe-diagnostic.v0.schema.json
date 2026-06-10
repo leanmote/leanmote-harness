@@ -1,0 +1,174 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://leanmote.com/specs/ahoe-diagnostic.v0.schema.json",
+  "title": "AHOE Diagnostic v0",
+  "description": "Payload firmado que produce la skill leanmote-harness y consumen la ingesta (UPLOAD-DATA slug harness-diagnostic) y la lectura (METRICS-API /ai-tools/harness). La organización NO viaja en el body: se resuelve server-side desde el bearer token (patrón UPLOAD-DATA).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "scope", "run", "maturity_vector", "agents", "findings"],
+  "properties": {
+    "schema_version": { "const": "ahoe.diagnostic.v0" },
+    "scope": {
+      "type": "string",
+      "enum": ["fleet", "single_agent"],
+      "description": "fleet = varios agentes bajo un mismo ownership; single_agent = un solo agente (team == ese agente)."
+    },
+    "tenant_label": {
+      "type": "string",
+      "description": "Etiqueta humana opcional, solo para logs. NO determina la org (la determina el token)."
+    },
+    "run": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "started_at", "completed_at", "skill_version"],
+      "properties": {
+        "id": { "type": "string", "description": "UUID del run, generado por la skill (idempotencia)." },
+        "started_at": { "type": "string", "format": "date-time" },
+        "completed_at": { "type": "string", "format": "date-time" },
+        "skill_version": { "type": "string", "description": "SemVer de la skill. Persistido: la comparabilidad cross-client depende de él." },
+        "rounds": { "type": "integer", "minimum": 1 },
+        "respondent_modes": {
+          "type": "array",
+          "items": { "type": "string", "enum": ["self", "proxy", "manager"] }
+        }
+      }
+    },
+    "maturity_vector": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["dimensions", "team_level", "gating_dimensions"],
+      "description": "Nivel TEAM (fleet). team_level DEBE == min(dimensions.*.level) (lowest-wins).",
+      "properties": {
+        "dimensions": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["context", "versioning", "governance", "drift_detection", "distribution"],
+          "properties": {
+            "context": { "$ref": "#/$defs/dimensionScore" },
+            "versioning": { "$ref": "#/$defs/dimensionScore" },
+            "governance": { "$ref": "#/$defs/dimensionScore" },
+            "drift_detection": { "$ref": "#/$defs/dimensionScore" },
+            "distribution": { "$ref": "#/$defs/dimensionScore" }
+          }
+        },
+        "team_level": { "$ref": "#/$defs/level" },
+        "gating_dimensions": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/dimensionName" },
+          "description": "Dimensiones cuyo level == team_level (las que anclan al fleet)."
+        }
+      }
+    },
+    "agents": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["external_id", "kind", "bottleneck_profile"],
+        "properties": {
+          "external_id": { "type": "string", "description": "ID estable del agente dentro del cliente." },
+          "name": { "type": "string", "maxLength": 120, "description": "Nombre amigable sugerido para mostrar en la UI. Es solo el default: en Leanmote se edita por agente (harness_agents) y no se pisa al re-postear." },
+          "kind": { "type": "string", "enum": ["claude_code", "cursor", "devin", "augment", "copilot", "custom"] },
+          "leanmote_user_hint": { "type": "string", "description": "Nombre/handle para matchear contra users.role=Bot y habilitar el deep-link con el tab Agents." },
+          "respondent_mode": { "type": "string", "enum": ["self", "proxy", "manager"] },
+          "bottleneck_profile": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["context_retrieval", "instruction_engineering", "context_packing", "grounding_verification", "output_feedback_loop", "collaboration"],
+            "properties": {
+              "context_retrieval": { "$ref": "#/$defs/axisScore" },
+              "instruction_engineering": { "$ref": "#/$defs/axisScore" },
+              "context_packing": { "$ref": "#/$defs/axisScore" },
+              "grounding_verification": { "$ref": "#/$defs/axisScore" },
+              "output_feedback_loop": { "$ref": "#/$defs/axisScore" },
+              "collaboration": { "$ref": "#/$defs/axisScore" }
+            }
+          },
+          "flags": {
+            "type": "array",
+            "items": { "type": "string", "enum": ["fragile_local_solution", "conflict", "candidate_pair", "too_new", "not_applicable"] }
+          }
+        }
+      }
+    },
+    "findings": {
+      "type": "array",
+      "description": "Punch-list Impact x Effort, gated a L+1.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "title", "impact", "effort"],
+        "properties": {
+          "id": { "type": "string" },
+          "title": { "type": "string" },
+          "finding_scope": { "type": "string", "enum": ["team", "agent"] },
+          "agent_external_id": { "type": "string", "description": "Requerido cuando finding_scope == agent." },
+          "dimension": { "$ref": "#/$defs/dimensionName" },
+          "axis": { "$ref": "#/$defs/axisName" },
+          "level_move": {
+            "type": "string",
+            "pattern": "^L[1-4]→L[1-4]$",
+            "description": "Solo L+1 (un rung). El receiver rechaza saltos > 1."
+          },
+          "impact": { "$ref": "#/$defs/grade" },
+          "effort": { "$ref": "#/$defs/grade" },
+          "rationale": { "type": "string" },
+          "evidence": { "type": "array", "items": { "type": "string" } },
+          "status": { "type": "string", "enum": ["open", "in_progress", "done", "dismissed"], "default": "open" }
+        }
+      }
+    },
+    "confidence_ledger": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "strong": { "type": "integer", "minimum": 0 },
+        "weak": { "type": "integer", "minimum": 0 },
+        "unverifiable": { "type": "integer", "minimum": 0 },
+        "triggers": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "conflicts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["target", "declared", "observed"],
+        "properties": {
+          "target": { "type": "string", "description": "dimensión o eje en conflicto." },
+          "declared": { "type": "string", "description": "lo que dice el manifest/interview." },
+          "observed": { "type": "string", "description": "lo que dicen los artifacts/Leanmote." },
+          "note": { "type": "string" }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "level": { "type": "string", "enum": ["L1", "L2", "L3", "L4"] },
+    "grade": { "type": "string", "enum": ["high", "medium", "low"] },
+    "dimensionName": { "type": "string", "enum": ["context", "versioning", "governance", "drift_detection", "distribution"] },
+    "axisName": { "type": "string", "enum": ["context_retrieval", "instruction_engineering", "context_packing", "grounding_verification", "output_feedback_loop", "collaboration"] },
+    "dimensionScore": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["level"],
+      "properties": {
+        "level": { "$ref": "#/$defs/level" },
+        "transition_to": { "oneOf": [{ "$ref": "#/$defs/level" }, { "type": "null" }] },
+        "evidence": { "type": "array", "items": { "type": "string" } },
+        "confidence": { "type": "string", "enum": ["strong", "weak", "insufficient"] }
+      }
+    },
+    "axisScore": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["state"],
+      "properties": {
+        "state": { "type": "string", "enum": ["healthy", "degraded", "broken", "insufficient_evidence"] },
+        "evidence": { "type": "array", "items": { "type": "string" } },
+        "confidence": { "type": "string", "enum": ["strong", "weak", "insufficient"] }
+      }
+    }
+  }
+}

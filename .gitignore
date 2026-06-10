@@ -1,0 +1,9 @@
+# Python
+__pycache__/
+*.py[cod]
+
+# Skill runtime artifacts (produced when the agent runs the skill)
+evidence.json
+draft.json
+payload.json
+*.draft.json
