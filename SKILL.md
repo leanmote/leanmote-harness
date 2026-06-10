@@ -53,6 +53,17 @@ Write your assessment as a JSON object (a "draft" — dimensions, agents,
 findings, confidence_ledger). See `references/contract.md` for the shape and
 `references/draft.example.json` for a filled example.
 
+**Capture the interview (recommended).** As you run the Q&A, record each
+question and the answer into that agent's `interview_transcript` array
+(`{round, question_id, question, answer}`). This preserves the evidence trail
+*behind* the scores — Leanmote stores it with the signed payload and renders it
+on demand as a per-agent **"View interview"** drill-down next to the bottleneck
+profile (it never weighs down the tab load). It is optional and additive; keep
+the answers concise — the whole payload still has to fit the POST limits.
+**Never quote secrets in answers**: no tokens, API keys, passwords or
+credential file contents — reference them by name/path instead (the transcript
+leaves the perimeter with the diagnostic).
+
 ### 3. Build + validate the payload
 ```
 python scripts/build_payload.py --draft draft.json --skill-version 0.1.0 --out payload.json

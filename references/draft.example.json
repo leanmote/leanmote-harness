@@ -16,7 +16,11 @@
       "bottleneck_profile": {
         "context_retrieval": { "state": "healthy" }, "instruction_engineering": { "state": "degraded" },
         "context_packing": { "state": "healthy" }, "grounding_verification": { "state": "degraded" },
-        "output_feedback_loop": { "state": "broken" }, "collaboration": { "state": "broken" } }, "flags": ["conflict"] },
+        "output_feedback_loop": { "state": "broken" }, "collaboration": { "state": "broken" } }, "flags": ["conflict"],
+      "interview_transcript": [
+        { "round": 1, "question_id": "B12", "question": "When you produce output that turns out to be wrong, what happens to that learning?", "answer": "Nothing flows back automatically. The QA agent tells me if the output works, not whether my process was good — there is no channel that updates my context or prompt from a failure." },
+        { "round": 1, "question_id": "B13", "question": "Who do you interact with on the team, and how?", "answer": "Only the Developer and QA agents, through Paperclip task hand-offs. I have no GitHub identity, so human reviews never reach me — which is why the collaboration graph shows me isolated." }
+      ] },
     { "external_id": "developer", "kind": "custom", "leanmote_user_hint": "Developer", "respondent_mode": "proxy",
       "bottleneck_profile": {
         "context_retrieval": { "state": "degraded" }, "instruction_engineering": { "state": "degraded" },

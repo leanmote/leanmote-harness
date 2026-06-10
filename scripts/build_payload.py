@@ -20,6 +20,17 @@ from datetime import datetime, timezone
 
 SCHEMA_VERSION = "ahoe.diagnostic.v0"
 LEVEL_ORDER = {"L1": 1, "L2": 2, "L3": 3, "L4": 4}
+TRANSCRIPT_SOFT_CAP_BYTES = 256 * 1024  # soft guidance: keep the interview concise
+
+
+def _transcript_bytes(payload):
+    """Total UTF-8 size of every agent's interview_transcript (0 if none)."""
+    total = 0
+    for a in payload.get("agents") or []:
+        t = a.get("interview_transcript") if isinstance(a, dict) else None
+        if t:
+            total += len(json.dumps(t, ensure_ascii=False).encode("utf-8"))
+    return total
 
 
 def _parse_level_move(move):
@@ -136,11 +147,17 @@ def main(argv=None):
             print("  -", e, file=sys.stderr)
         return 1
 
+    transcript_bytes = _transcript_bytes(payload)
+    if transcript_bytes > TRANSCRIPT_SOFT_CAP_BYTES:
+        print(f"WARNING — interview_transcript is {transcript_bytes // 1024} KB "
+              f"(> {TRANSCRIPT_SOFT_CAP_BYTES // 1024} KB soft cap). Consider trimming "
+              f"answers; oversized payloads slow the POST and the drill-down.", file=sys.stderr)
+
     with open(args.out, "w") as fh:
         json.dump(payload, fh, ensure_ascii=False, indent=2)
     print(f"OK — {args.out} (team_level={payload['maturity_vector'].get('team_level')}, "
           f"gating={payload['maturity_vector'].get('gating_dimensions')}, "
-          f"findings={len(payload['findings'])})")
+          f"findings={len(payload['findings'])}, transcript={transcript_bytes // 1024}KB)")
     return 0
 
 

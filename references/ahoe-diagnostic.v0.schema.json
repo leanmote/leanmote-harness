@@ -88,6 +88,11 @@
           "flags": {
             "type": "array",
             "items": { "type": "string", "enum": ["fragile_local_solution", "conflict", "candidate_pair", "too_new", "not_applicable"] }
+          },
+          "interview_transcript": {
+            "type": "array",
+            "description": "Q&A crudo de la entrevista HE-GEO para este agente (round + pregunta + respuesta). Opcional y aditivo: la skill lo adjunta si capturó la entrevista. El receiver lo preserva en el payload firmado y lo sirve on-demand en el drill-down 'View interview' (no viaja en la carga del tab). Mantenerlo conciso.",
+            "items": { "$ref": "#/$defs/transcriptEntry" }
           }
         }
       }
@@ -168,6 +173,17 @@
         "state": { "type": "string", "enum": ["healthy", "degraded", "broken", "insufficient_evidence"] },
         "evidence": { "type": "array", "items": { "type": "string" } },
         "confidence": { "type": "string", "enum": ["strong", "weak", "insufficient"] }
+      }
+    },
+    "transcriptEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["question", "answer"],
+      "properties": {
+        "round": { "type": "integer", "minimum": 1, "description": "Ronda de la entrevista (1..n)." },
+        "question_id": { "type": "string", "description": "ID estable de la pregunta (ej. A1, B11)." },
+        "question": { "type": "string", "description": "Texto de la pregunta." },
+        "answer": { "type": "string", "description": "Respuesta del agente/respondent." }
       }
     }
   }

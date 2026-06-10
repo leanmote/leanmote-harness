@@ -31,6 +31,10 @@ Sign over the exact bytes you POST. Timestamp must be within ±600s (anti-replay
 5. **L+1 gating:** every `level_move` advances exactly one rung.
 6. Every `agent`-scoped finding references an `external_id` present in `agents[]`;
    every finding has `title` + `impact` + `effort`.
+7. **Transcript:** optional `agents[].interview_transcript` is preserved inside
+   the stored signed payload and served on demand by Leanmote's "View interview"
+   drill-down — it is never embedded in the dashboard's hot payload. Not a
+   rejection cause; keep it concise (`build_payload.py` warns past ~256 KB).
 
 A payload that violates any rule is rejected (4xx) — `build_payload.py` catches
 these locally so the agent never posts something the receiver will refuse.
