@@ -34,6 +34,20 @@ can't ground a state. Don't guess.
 
 ## Findings (the Impact × Effort punch list)
 Each finding: `title`, `impact` (high/medium/low), `effort` (high/medium/low),
-plus either a `dimension` + `level_move` (team finding) or an `axis` +
-`agent_external_id` (agent finding). Favor high-impact / low-effort moves on the
-**gating** dimensions first — those are what raise the team level.
+plus a `dimension` + `level_move` (a maturity move) and/or an `axis` +
+`agent_external_id` (an operational move). The two are **not exclusive** — a
+finding may carry both when one move closes both gaps.
+
+**Tag the dimension whenever a move closes a gating dimension's gap.** If a move
+would raise a *gating* dimension one rung, it MUST carry that `dimension` +
+`level_move` — even when it is also an agent/axis finding. Example: "add a domain
+glossary + examples to agent X" raises **Context** (L1→L2) *and* improves the
+**Retrieval** axis → tag it with BOTH `dimension: context` + `level_move:
+"L1→L2"` AND `axis: context_retrieval` + `agent_external_id`. One finding, both
+tags: it then surfaces under the Context dimension *and* the Retrieval axis,
+without being duplicated in the punch-list.
+
+Never bury a gating-dimension move under an axis-only finding — the dimension is
+what raises the team level, so the move has to be discoverable from the very
+dimension whose evidence flagged the gap. Favor high-impact / low-effort moves on
+the **gating** dimensions first; those are what raise the team level.

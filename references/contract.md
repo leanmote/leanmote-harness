@@ -30,7 +30,10 @@ Sign over the exact bytes you POST. Timestamp must be within ±600s (anti-replay
 4. **Lowest-wins:** `team_level == min(dimension levels)`. *(build_payload computes it.)*
 5. **L+1 gating:** every `level_move` advances exactly one rung.
 6. Every `agent`-scoped finding references an `external_id` present in `agents[]`;
-   every finding has `title` + `impact` + `effort`.
+   every finding has `title` + `impact` + `effort`. A finding MAY carry both a
+   `dimension`+`level_move` and an `axis`+`agent_external_id` (not mutually
+   exclusive) — use that when one move closes both a maturity gap and an
+   operational gap, so it surfaces under the dimension *and* the axis.
 7. **Transcript:** optional `agents[].interview_transcript` is preserved inside
    the stored signed payload and served on demand by Leanmote's "View interview"
    drill-down — it is never embedded in the dashboard's hot payload. Not a

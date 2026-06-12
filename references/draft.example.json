@@ -1,5 +1,5 @@
 {
-  "_comment": "Draft del agente (paso 2). NO incluye schema_version/run/team_level/gating — build_payload.py los completa. Este ejemplo es la flota de 3 agentes de Leanmote.",
+  "_comment": "Draft del agente (paso 2). NO incluye schema_version/run/team_level/gating — build_payload.py los completa. Este ejemplo es la flota de 3 agentes de Leanmote. Ver f6: un finding puede llevar dimension+level_move Y axis+agent_external_id a la vez (cross-tag) cuando un mismo move cierra un gap de madurez y uno operativo.",
   "scope": "fleet",
   "tenant_label": "Leanmote internal dev pipeline",
   "maturity_vector": {
@@ -37,7 +37,8 @@
     { "id": "f2", "title": "Add pre-handoff verification to Developer's AGENTS.md", "finding_scope": "agent", "agent_external_id": "developer", "axis": "grounding_verification", "impact": "high", "effort": "low" },
     { "id": "f3", "title": "Put all three AGENTS.md files under version control", "finding_scope": "team", "dimension": "versioning", "level_move": "L1→L2", "impact": "high", "effort": "medium" },
     { "id": "f4", "title": "Add verification-depth checklist to QA's AGENTS.md", "finding_scope": "agent", "agent_external_id": "qa", "axis": "grounding_verification", "impact": "high", "effort": "low" },
-    { "id": "f5", "title": "Authorize a fleet-wide domain glossary", "finding_scope": "team", "dimension": "context", "level_move": "L2→L3", "impact": "high", "effort": "low" }
+    { "id": "f5", "title": "Authorize a fleet-wide domain glossary", "finding_scope": "team", "dimension": "context", "level_move": "L2→L3", "impact": "high", "effort": "low" },
+    { "id": "f6", "title": "Wire QA-failure learnings back into Orchestrator's context", "finding_scope": "agent", "agent_external_id": "orchestrator", "dimension": "drift_detection", "level_move": "L1→L2", "axis": "output_feedback_loop", "impact": "high", "effort": "medium" }
   ],
   "confidence_ledger": { "strong": 50, "weak": 18, "unverifiable": 2, "triggers": 70 },
   "conflicts": []

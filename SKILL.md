@@ -46,6 +46,11 @@ Grounding/Verification, Output Feedback Loop, Collaboration) pick a state
   `team_level` — the script computes it.*
 - **L+1 gating:** every finding's `level_move` advances exactly one rung
   (e.g. `L1→L2`). Never recommend a skip.
+- **Cross-tag gating moves:** a finding may carry BOTH a `dimension`+`level_move`
+  and an `axis`+`agent_external_id`. If a move closes a *gating* dimension's gap
+  it MUST carry that `dimension`+`level_move` (not only the axis) — otherwise it
+  never surfaces under the dimension whose evidence demanded it. See
+  `references/scoring-rubric.md` → Findings.
 - **Evidence, not vibes:** every level/state carries at least one evidence string
   from step 1. Use `insufficient_evidence` honestly when you can't ground it.
 
